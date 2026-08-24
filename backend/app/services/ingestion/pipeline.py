@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Any
 from datetime import datetime
 from uuid import UUID
 from pydantic import BaseModel
@@ -23,6 +23,7 @@ class IngestionResult(BaseModel):
     errors: List[str] = []
     warnings: List[str] = []
     stored_count: int = 0
+    raw_data: Optional[Any] = None
 
 class IngestionPipeline:
     def __init__(
@@ -58,7 +59,7 @@ class IngestionPipeline:
             storage_res = await self.storage.store_quote(raw_quote)
             self.metrics.record_success()
             self.metrics.record_stored_items(storage_res.count)
-            return IngestionResult(status="success", stored_count=storage_res.count)
+            return IngestionResult(status="success", stored_count=storage_res.count, raw_data=raw_quote)
 
         except Exception as e:
             self.metrics.record_failure()
@@ -132,7 +133,7 @@ class IngestionPipeline:
                 storage_res = await self.storage.store_ohlcv_batch(valid_data)
                 self.metrics.record_success()
                 self.metrics.record_stored_items(storage_res.count)
-                return IngestionResult(status="success", stored_count=storage_res.count)
+                return IngestionResult(status="success", stored_count=storage_res.count, raw_data=raw_quote)
             else:
                 return IngestionResult(status="validation_failed", errors=["All data points failed validation"])
 

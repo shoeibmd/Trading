@@ -7,3 +7,6 @@ asyncpg
 redis
 pytest
 celery
+alembic
+psycopg2-binary
+pytest-asyncio

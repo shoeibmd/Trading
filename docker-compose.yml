@@ -1,33 +1,4 @@
-
 services:
-  backend:
-    image: python:3.11-slim
-    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    volumes:
-      - ./backend:/app
-    working_dir: /app
-    ports:
-      - "8000:8000"
-    environment:
-      - APP_ENVIRONMENT=development
-      - APP_POSTGRES_DSN=${POSTGRES_DSN}
-      - APP_REDIS_URL=${REDIS_URL}
-    depends_on:
-      - postgres
-      - redis
-
-  frontend:
-    image: node:20-alpine
-    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    working_dir: /app
-    ports:
-      - "5173:5173"
-    environment:
-      - NODE_ENV=development
-
   postgres:
     image: timescale/timescaledb:latest-pg15
     environment:
@@ -38,6 +9,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-financial_terminal}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
 
   redis:
     image: redis:7-alpine
@@ -45,6 +24,89 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENVIRONMENT=${APP_ENVIRONMENT:-development}
+      - APP_POSTGRES_DSN=${POSTGRES_DSN}
+      - APP_REDIS_URL=${REDIS_URL}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: ["celery", "-A", "app.worker.celery_app", "worker", "--loglevel=info"]
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    environment:
+      - APP_ENVIRONMENT=${APP_ENVIRONMENT:-development}
+      - APP_POSTGRES_DSN=${POSTGRES_DSN}
+      - APP_REDIS_URL=${REDIS_URL}
+    depends_on:
+      backend:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - VITE_API_URL=${VITE_API_URL:-/api}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5173"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
 
 volumes:
   postgres_data:

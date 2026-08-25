@@ -3,7 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-async def run_ohlcv_collector_job():
+async def run_ohlcv_collector_job() -> None:
     """Skeleton task for collecting OHLCV bars periodically."""
     logger.info("OHLCV collector job executing...")
     # TODO: Connect to Pipeline orchestrator here for Phase 6+ integration

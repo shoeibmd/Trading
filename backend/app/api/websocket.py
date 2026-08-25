@@ -14,7 +14,7 @@ redis_manager = AsyncRedisManager(config)
 bridge = RedisWebSocketBridge(redis_manager, ws_manager)
 
 # Start background tasks conceptually (in a real app, this runs on startup events)
-ws_manager.start_cleanup_task()
+# ws_manager.start_cleanup_task()
 
 @router.websocket("/ws")
 async def websocket_endpoint(

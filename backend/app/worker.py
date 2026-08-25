@@ -9,5 +9,5 @@ celery_app = Celery(
 )
 
 @celery_app.task
-def dummy_task():
+def dummy_task() -> str:
     return "ok"

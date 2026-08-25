@@ -12,3 +12,4 @@ psycopg2-binary
 pytest-asyncio
 mypy>=1.8.0
 types-redis
+httpx

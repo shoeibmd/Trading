@@ -1,79 +1,82 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EmptyState } from '../components/states/EmptyState';
 import { Plus } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { PanelContainer } from '../components/panels/PanelContainer';
-import { panelRegistry } from '../services/panelRegistry';
-import { getDefaultConfiguration, generatePanelId } from '../utils/panelUtils';
-
-interface ActivePanel {
-  id: string; // unique instance id
-  definitionId: string; // registry definition id
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  configuration: any;
-}
+import { GridLayout } from '../components/workspace/GridLayout';
+import { PanelPicker } from '../components/workspace/PanelPicker';
+import { useWorkspaceStore } from '../store/useWorkspaceStore';
 
 export const MainWorkspace: React.FC = () => {
-  const [activePanels, setActivePanels] = useState<ActivePanel[]>([]);
+  const { workspaces, activeWorkspaceId, loadWorkspaces, isLoading, error } = useWorkspaceStore();
+  const [isPanelPickerOpen, setIsPanelPickerOpen] = useState(false);
 
-  const handleAddTestPanel = () => {
-    const testPanelDef = panelRegistry.get('test-panel');
-    if (!testPanelDef) return;
+  useEffect(() => {
+    loadWorkspaces();
+  }, [loadWorkspaces]);
 
-    const newPanel: ActivePanel = {
-      id: generatePanelId(),
-      definitionId: testPanelDef.id,
-      configuration: getDefaultConfiguration(testPanelDef.configurationSchema)
-    };
+  const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId);
+  const panelsCount = activeWorkspace?.layout?.panels?.length || 0;
 
-    setActivePanels(prev => [...prev, newPanel]);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex-1 bg-muted/20 relative overflow-hidden flex flex-col h-full items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <p className="mt-4 text-sm text-muted-foreground">Loading workspaces...</p>
+      </div>
+    );
+  }
 
-  const handleClosePanel = (panelId: string) => {
-    setActivePanels(prev => prev.filter(p => p.id !== panelId));
-  };
+  if (error) {
+    return (
+      <div className="flex-1 bg-muted/20 relative overflow-hidden flex flex-col h-full items-center justify-center text-destructive">
+        <p>Failed to load workspace data: {error}</p>
+        <Button className="mt-4" onClick={() => loadWorkspaces()}>Retry</Button>
+      </div>
+    );
+  }
+
+  if (!activeWorkspace) {
+    return (
+      <div className="flex-1 bg-muted/20 relative overflow-hidden flex flex-col h-full items-center justify-center">
+        <EmptyState
+          title="No Active Workspace"
+          description="Create or select a workspace to continue"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 bg-muted/20 relative overflow-hidden flex flex-col h-full" data-testid="main-workspace">
       {/* Workspace Toolbar */}
-      <div className="h-12 border-b flex items-center justify-between px-4 bg-background">
-        <h2 className="text-sm font-semibold">Default Workspace</h2>
+      <div className="h-10 border-b flex items-center justify-between px-4 bg-background">
+        <h2 className="text-sm font-semibold">{activeWorkspace.name}</h2>
         <div className="flex items-center gap-2">
-          <Button size="sm" onClick={handleAddTestPanel} className="h-8 gap-2">
-            <Plus className="h-4 w-4" />
-            Add Test Panel
+          <Button size="sm" onClick={() => setIsPanelPickerOpen(true)} className="h-7 text-xs gap-1">
+            <Plus className="h-3.5 w-3.5" />
+            Add Panel
           </Button>
         </div>
       </div>
 
       {/* Workspace Content */}
-      <div className="flex-1 overflow-auto p-4">
-        {activePanels.length === 0 ? (
+      <div className="flex-1 overflow-auto relative">
+        {panelsCount === 0 ? (
           <EmptyState
             title="Workspace is empty"
             description="Add panels to start building your terminal"
-            action={{ label: "Add Panel", onClick: handleAddTestPanel }}
+            action={{ label: "Add Panel", onClick: () => setIsPanelPickerOpen(true) }}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[300px]">
-            {activePanels.map(panel => {
-              const definition = panelRegistry.get(panel.definitionId);
-              if (!definition) return null;
-
-              return (
-                <div key={panel.id} className="h-full w-full">
-                  <PanelContainer
-                    panelId={panel.id}
-                    definition={definition}
-                    initialConfiguration={panel.configuration}
-                    onClose={handleClosePanel}
-                  />
-                </div>
-              );
-            })}
-          </div>
+          <GridLayout workspaceId={activeWorkspace.id} />
         )}
       </div>
+
+      <PanelPicker
+        isOpen={isPanelPickerOpen}
+        onClose={() => setIsPanelPickerOpen(false)}
+        workspaceId={activeWorkspace.id}
+      />
     </div>
   );
 };

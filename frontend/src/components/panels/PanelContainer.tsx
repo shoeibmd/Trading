@@ -13,13 +13,15 @@ interface PanelContainerProps {
   definition: PanelDefinition;
   initialConfiguration: PanelConfiguration;
   onClose: (panelId: string) => void;
+  onConfigurationChange?: (config: PanelConfiguration) => void;
 }
 
 export const PanelContainer: React.FC<PanelContainerProps> = ({
   panelId,
   definition,
   initialConfiguration,
-  onClose
+  onClose,
+  onConfigurationChange
 }) => {
   const [configuration, setConfiguration] = useState<PanelConfiguration>(initialConfiguration);
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -29,6 +31,9 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
 
   const handleConfigurationChange = (newConfig: PanelConfiguration) => {
     setConfiguration(newConfig);
+    if (onConfigurationChange) {
+      onConfigurationChange(newConfig);
+    }
   };
 
   const handleRefresh = () => {
@@ -51,7 +56,6 @@ export const PanelContainer: React.FC<PanelContainerProps> = ({
     // Success state - render the actual component
     const Component = definition.component;
 
-    // We pass props directly, but also provide them via context for nested components
     const panelProps: PanelProps = {
       panelId,
       configuration,

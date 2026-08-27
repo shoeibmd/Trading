@@ -1,30 +1,18 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { TopBar } from './TopBar';
 import { Sidebar } from './Sidebar';
-import { MainWorkspace } from './MainWorkspace';
-import { useAppStore } from '@/store/useAppStore';
+import { TopBar } from './TopBar';
 
-export function AppLayout() {
-  const theme = useAppStore(state => state.theme);
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
-
+export const AppLayout: React.FC = () => {
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden text-foreground bg-background">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-background text-foreground">
       <TopBar />
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <MainWorkspace>
+        <main className="flex flex-1 flex-col overflow-hidden relative">
           <Outlet />
-        </MainWorkspace>
+        </main>
       </div>
     </div>
   );
-}
+};

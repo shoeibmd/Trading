@@ -9,3 +9,5 @@ api_router.include_router(instruments.router, prefix="/instruments", tags=["inst
 api_router.include_router(portfolios.router, prefix="/portfolios", tags=["portfolios"])
 api_router.include_router(fundamentals.router, prefix="/fundamentals", tags=["fundamentals"])
 api_router.include_router(workspaces.router, prefix="/workspaces", tags=["workspaces"])
+api_router.include_router(watchlists.router, prefix="/watchlists", tags=["watchlists"])
+api_router.include_router(markets.router, prefix="/markets", tags=["markets"])

@@ -10,6 +10,7 @@ from app.models.core import Base
 from app.api.deps import get_db
 # Import all models to ensure Base.metadata.create_all works
 import app.models.workspace
+import app.models.watchlist
 
 # Use an in-memory SQLite database for testing ORM logic
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

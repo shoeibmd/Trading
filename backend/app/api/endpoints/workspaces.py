@@ -19,8 +19,8 @@ async def get_default_user(db: AsyncSession) -> User:
         user = User(
             email="test@test.com",
             hashed_password="pw",
-            username="testuser",
-            full_name="Test User"
+            is_active=True,
+            is_superuser=False
         )
         db.add(user)
         await db.commit()

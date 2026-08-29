@@ -43,3 +43,63 @@ async def test_update_and_delete_workspace(async_client: AsyncClient, override_g
 
     get_response = await async_client.get(f"/api/v1/workspaces/{workspace_id}")
     assert get_response.status_code == 404
+
+@pytest.mark.asyncio
+async def test_get_market_aggregations(async_client: AsyncClient, override_get_db):
+    response = await async_client.get("/api/v1/markets/overview")
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert "indices" in data["data"]
+
+    response = await async_client.get("/api/v1/markets/gainers")
+    assert response.status_code == 200
+
+    response = await async_client.get("/api/v1/markets/losers")
+    assert response.status_code == 200
+
+    response = await async_client.get("/api/v1/markets/most-active")
+    assert response.status_code == 200
+
+    response = await async_client.get("/api/v1/markets/breadth")
+    assert response.status_code == 200
+
+@pytest.mark.asyncio
+async def test_watchlist_endpoints(async_client: AsyncClient, override_get_db):
+    wl_data = {
+        "name": "Tech Stocks"
+    }
+
+    # Create
+    create_resp = await async_client.post("/api/v1/watchlists/", json=wl_data)
+    assert create_resp.status_code == 200
+    wl_id = create_resp.json()["data"]["id"]
+
+    # Get
+    get_resp = await async_client.get(f"/api/v1/watchlists/{wl_id}")
+    assert get_resp.status_code == 200
+
+    # Update
+    update_resp = await async_client.patch(f"/api/v1/watchlists/{wl_id}", json={"name": "New Name"})
+    assert update_resp.status_code == 200
+    assert update_resp.json()["data"]["name"] == "New Name"
+
+    # Delete
+    del_resp = await async_client.delete(f"/api/v1/watchlists/{wl_id}")
+    assert del_resp.status_code == 200
+
+@pytest.mark.asyncio
+async def test_ohlcv_and_indicators(async_client: AsyncClient, override_get_db):
+    response = await async_client.get("/api/v1/ohlcv/AAPL?interval=1d&limit=50")
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert len(data["data"]) == 50
+    assert "open" in data["data"][0]
+
+    response = await async_client.get("/api/v1/indicators/AAPL?indicator=rsi&interval=1d&period=14")
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert len(data["data"]) == 100
+    assert "close" in data["data"][0]

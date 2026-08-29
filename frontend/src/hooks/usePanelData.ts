@@ -1,11 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { DataRequirement, PanelConfiguration, PanelState } from '../types/panel';
-import { panelRegistry } from '../services/panelRegistry';
 import { apiClient } from '../services/apiClient';
 import { useWebSocket } from './useWebSocket';
 import { useEffect, useState } from 'react';
 
-// Utility to build the correct API URL based on data requirements
 const buildApiUrl = (req: DataRequirement, config: PanelConfiguration): string => {
   switch (req.type) {
     case 'instrument':
@@ -27,15 +25,13 @@ export function usePanelData(
   refreshTrigger: number
 ): PanelState {
 
-  // For Phase 11 panels, we assume the first requirement dictates the main fetch
   const primaryReq = requirements[0];
   const endpointUrl = primaryReq ? buildApiUrl(primaryReq, configuration) : null;
 
-  const { data, isLoading, error, refetch } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['panelData', endpointUrl, configuration, refreshTrigger],
     queryFn: async () => {
       if (!endpointUrl) return null;
-      // In a real scenario, we might have simulated config flags for testing framework
       if (configuration.simulateError) throw new Error('Simulated error');
       if (configuration.simulateEmpty) return [];
 
@@ -47,18 +43,13 @@ export function usePanelData(
     refetchInterval: 60000,
   });
 
-  // Basic WebSocket Integration
-  const { lastMessage, isConnected } = useWebSocket();
+  const { lastMessage } = useWebSocket();
   const [liveData, setLiveData] = useState<any>(null);
 
   useEffect(() => {
-    // If the websocket emits a message relevant to our panel, we merge it.
-    // For simplicity in Phase 11 skeleton, we just listen. A robust implementation
-    // would check the topic string (e.g., `market:gainers:NSE`) against our config.
     if (lastMessage) {
       try {
         const msg = JSON.parse(lastMessage.data);
-        // Only update if topic matches
         if (msg.topic === configuration.wsTopic) {
            setLiveData(msg.payload);
         }
@@ -68,7 +59,6 @@ export function usePanelData(
     }
   }, [lastMessage, configuration.wsTopic]);
 
-  // If we have no endpoint, we might be a pure utility panel (like TestPanel)
   if (!endpointUrl) {
     return {
       status: configuration.simulateError ? 'error' : (configuration.simulateEmpty ? 'empty' : 'success'),
@@ -78,7 +68,6 @@ export function usePanelData(
     };
   }
 
-  // Merge static REST data with live WS data
   const mergedData = liveData || data;
 
   let status: PanelState['status'] = 'success';

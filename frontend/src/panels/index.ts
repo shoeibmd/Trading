@@ -6,6 +6,10 @@ import { topLosersPanelDefinition } from '../components/panels/market/TopLosersP
 import { mostActivePanelDefinition } from '../components/panels/market/MostActivePanel';
 import { marketBreadthPanelDefinition } from '../components/panels/market/MarketBreadthPanel';
 import { watchlistPanelDefinition } from '../components/panels/market/WatchlistPanel';
+import { stockOverviewPanelDefinition } from '../components/panels/stock/StockOverviewPanel';
+import { stockQuotePanelDefinition } from '../components/panels/stock/StockQuotePanel';
+import { stockChartPanelDefinition } from '../components/panels/stock/StockChartPanel';
+import { technicalIndicatorsPanelDefinition } from '../components/panels/stock/TechnicalIndicatorsPanel';
 
 export function initializePanels() {
   try {
@@ -19,6 +23,12 @@ export function initializePanels() {
     panelRegistry.register(mostActivePanelDefinition);
     panelRegistry.register(marketBreadthPanelDefinition);
     panelRegistry.register(watchlistPanelDefinition);
+
+    // Phase 12 panels
+    panelRegistry.register(stockOverviewPanelDefinition);
+    panelRegistry.register(stockQuotePanelDefinition);
+    panelRegistry.register(stockChartPanelDefinition);
+    panelRegistry.register(technicalIndicatorsPanelDefinition);
 
     console.log('Panels initialized successfully.');
   } catch (error) {

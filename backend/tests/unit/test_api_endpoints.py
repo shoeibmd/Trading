@@ -103,3 +103,24 @@ async def test_ohlcv_and_indicators(async_client: AsyncClient, override_get_db):
     assert "data" in data
     assert len(data["data"]) == 100
     assert "close" in data["data"][0]
+
+@pytest.mark.asyncio
+async def test_news_endpoints(async_client: AsyncClient):
+    # Test GET /api/v1/news/
+    response = await async_client.get("/api/v1/news/?limit=5")
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert len(data["data"]) == 5
+    assert "id" in data["data"][0]
+
+    # Test GET /api/v1/news/search
+    search_res = await async_client.get("/api/v1/news/search?q=Mock&limit=5")
+    assert search_res.status_code == 200
+    assert len(search_res.json()["data"]) > 0
+
+    # Test GET /api/v1/news/{article_id}
+    article_id = data["data"][0]["id"]
+    detail_res = await async_client.get(f"/api/v1/news/{article_id}")
+    assert detail_res.status_code == 200
+    assert detail_res.json()["data"]["id"] == article_id

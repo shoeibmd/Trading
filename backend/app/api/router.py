@@ -13,3 +13,4 @@ api_router.include_router(watchlists.router, prefix="/watchlists", tags=["watchl
 api_router.include_router(markets.router, prefix="/markets", tags=["markets"])
 api_router.include_router(ohlcv.router, prefix="/ohlcv", tags=["ohlcv"])
 api_router.include_router(indicators.router, prefix="/indicators", tags=["indicators"])
+api_router.include_router(news.router, prefix="/news", tags=["news"])

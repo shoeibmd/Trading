@@ -14,6 +14,19 @@ const buildApiUrl = (req: DataRequirement, config: PanelConfiguration): string =
       if (config.endpoint === 'breadth') return `/api/v1/markets/breadth?exchange=${config.exchange || 'NSE'}`;
       if (config.endpoint === 'watchlist' && config.watchlistId) return `/api/v1/watchlists/${config.watchlistId}`;
       return '';
+    case 'quote':
+      if (config.endpoint === 'stock-overview' && config.symbol) return `/api/v1/instruments/${config.symbol}`;
+      if (config.endpoint === 'stock-quote' && config.symbol) return `/api/v1/quotes/${config.symbol}`;
+      return '';
+    case 'ohlcv':
+      if (config.symbol) return `/api/v1/ohlcv/${config.symbol}?interval=${config.interval || '1d'}`;
+      return '';
+    case 'news':
+      if (config.endpoint === 'news-market') return `/api/v1/news/?limit=${config.limit || 20}`;
+      if (config.endpoint === 'news-company' && config.symbol) return `/api/v1/news/instrument/${config.symbol}?limit=${config.limit || 20}`;
+      if (config.endpoint === 'news-search' && config.query) return `/api/v1/news/search?q=${config.query}&limit=20`;
+      if (config.endpoint === 'news-article' && config.articleId) return `/api/v1/news/${config.articleId}`;
+      return '';
     default:
       return '';
   }

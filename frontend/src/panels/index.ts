@@ -14,6 +14,10 @@ import { marketNewsPanelDefinition } from '../components/panels/news/MarketNewsP
 import { companyNewsPanelDefinition } from '../components/panels/news/CompanyNewsPanel';
 import { newsSearchPanelDefinition } from '../components/panels/news/NewsSearchPanel';
 import { newsArticleDetailPanelDefinition } from '../components/panels/news/NewsArticleDetailPanel';
+import { companyProfilePanelDefinition } from '../components/panels/fundamentals/CompanyProfilePanel';
+import { financialStatementsPanelDefinition } from '../components/panels/fundamentals/FinancialStatementsPanel';
+import { financialRatiosPanelDefinition } from '../components/panels/fundamentals/FinancialRatiosPanel';
+import { historicalFundamentalsPanelDefinition } from '../components/panels/fundamentals/HistoricalFundamentalsPanel';
 
 export function initializePanels() {
   try {
@@ -38,6 +42,12 @@ export function initializePanels() {
     panelRegistry.register(companyNewsPanelDefinition);
     panelRegistry.register(newsSearchPanelDefinition);
     panelRegistry.register(newsArticleDetailPanelDefinition);
+
+    // Phase 14
+    panelRegistry.register(companyProfilePanelDefinition);
+    panelRegistry.register(financialStatementsPanelDefinition);
+    panelRegistry.register(financialRatiosPanelDefinition);
+    panelRegistry.register(historicalFundamentalsPanelDefinition);
 
     console.log('Panels initialized successfully.');
   } catch (error) {

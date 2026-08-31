@@ -124,3 +124,21 @@ async def test_news_endpoints(async_client: AsyncClient):
     detail_res = await async_client.get(f"/api/v1/news/{article_id}")
     assert detail_res.status_code == 200
     assert detail_res.json()["data"]["id"] == article_id
+
+@pytest.mark.asyncio
+async def test_fundamentals_endpoints(async_client: AsyncClient):
+    # Test GET /api/v1/fundamentals/{id}/profile
+    res = await async_client.get("/api/v1/fundamentals/123e4567-e89b-12d3-a456-426614174000/profile")
+    assert res.status_code == 200
+
+    # Test GET statements
+    res = await async_client.get("/api/v1/fundamentals/123e4567-e89b-12d3-a456-426614174000/statements/income")
+    assert res.status_code == 200
+
+    # Test GET ratios
+    res = await async_client.get("/api/v1/fundamentals/123e4567-e89b-12d3-a456-426614174000/ratios")
+    assert res.status_code == 200
+
+    # Test GET historical
+    res = await async_client.get("/api/v1/fundamentals/123e4567-e89b-12d3-a456-426614174000/historical?metric=revenue")
+    assert res.status_code == 200

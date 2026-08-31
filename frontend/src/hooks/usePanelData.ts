@@ -27,6 +27,12 @@ const buildApiUrl = (req: DataRequirement, config: PanelConfiguration): string =
       if (config.endpoint === 'news-search' && config.query) return `/api/v1/news/search?q=${config.query}&limit=20`;
       if (config.endpoint === 'news-article' && config.articleId) return `/api/v1/news/${config.articleId}`;
       return '';
+    case 'fundamentals':
+      if (config.endpoint === 'fundamentals-profile' && config.symbol) return `/api/v1/fundamentals/${config.symbol}/profile`;
+      if (config.endpoint === 'fundamentals-statements' && config.symbol) return `/api/v1/fundamentals/${config.symbol}/statements/${config.statementType || 'income'}?period_type=${config.periodType || 'annual'}&limit=4`;
+      if (config.endpoint === 'fundamentals-ratios' && config.symbol) return `/api/v1/fundamentals/${config.symbol}/ratios?period_type=${config.periodType || 'annual'}&limit=4`;
+      if (config.endpoint === 'fundamentals-historical' && config.symbol && config.metric) return `/api/v1/fundamentals/${config.symbol}/historical?metric=${config.metric}&period_type=${config.periodType || 'annual'}&limit=20`;
+      return '';
     default:
       return '';
   }

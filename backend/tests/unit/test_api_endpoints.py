@@ -142,3 +142,26 @@ async def test_fundamentals_endpoints(async_client: AsyncClient):
     # Test GET historical
     res = await async_client.get("/api/v1/fundamentals/123e4567-e89b-12d3-a456-426614174000/historical?metric=revenue")
     assert res.status_code == 200
+
+@pytest.mark.asyncio
+
+@pytest.mark.asyncio
+async def test_portfolio_endpoints(async_client: AsyncClient, override_get_db):
+    port_data = {
+        "name": "My Portfolio",
+        "currency": "USD",
+        "is_default": True
+    }
+    create_resp = await async_client.post("/api/v1/portfolios/", json=port_data)
+    assert create_resp.status_code == 200
+    portfolio_id = create_resp.json()["data"]["id"]
+
+    get_resp = await async_client.get(f"/api/v1/portfolios/{portfolio_id}")
+    assert get_resp.status_code == 200
+
+    list_resp = await async_client.get("/api/v1/portfolios/")
+    assert list_resp.status_code == 200
+    assert len(list_resp.json()["data"]) >= 1
+
+    sum_resp = await async_client.get(f"/api/v1/portfolios/{portfolio_id}/summary")
+    assert sum_resp.status_code == 200

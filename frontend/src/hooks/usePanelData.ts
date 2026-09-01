@@ -33,6 +33,11 @@ const buildApiUrl = (req: DataRequirement, config: PanelConfiguration): string =
       if (config.endpoint === 'fundamentals-ratios' && config.symbol) return `/api/v1/fundamentals/${config.symbol}/ratios?period_type=${config.periodType || 'annual'}&limit=4`;
       if (config.endpoint === 'fundamentals-historical' && config.symbol && config.metric) return `/api/v1/fundamentals/${config.symbol}/historical?metric=${config.metric}&period_type=${config.periodType || 'annual'}&limit=20`;
       return '';
+    case 'portfolio':
+      if (config.endpoint === 'portfolio-positions' && config.portfolioId) return `/api/v1/portfolios/${config.portfolioId}/positions`;
+      if (config.endpoint === 'portfolio-transactions' && config.portfolioId) return `/api/v1/portfolios/${config.portfolioId}/transactions`;
+      if (config.endpoint === 'portfolio-summary' && config.portfolioId) return `/api/v1/portfolios/${config.portfolioId}/summary`;
+      return '';
     default:
       return '';
   }
@@ -92,7 +97,7 @@ export function usePanelData(
   let status: PanelState['status'] = 'success';
   if (isLoading) status = 'loading';
   else if (error) status = 'error';
-  else if (!mergedData || (Array.isArray(mergedData) && mergedData.length === 0)) status = 'empty';
+  else if (!mergedData || (Array.isArray(mergedData) && mergedData.length === 0) || (typeof mergedData === 'object' && Object.keys(mergedData).length === 0)) status = 'empty';
 
   return {
     status,

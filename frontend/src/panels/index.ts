@@ -18,6 +18,9 @@ import { companyProfilePanelDefinition } from '../components/panels/fundamentals
 import { financialStatementsPanelDefinition } from '../components/panels/fundamentals/FinancialStatementsPanel';
 import { financialRatiosPanelDefinition } from '../components/panels/fundamentals/FinancialRatiosPanel';
 import { historicalFundamentalsPanelDefinition } from '../components/panels/fundamentals/HistoricalFundamentalsPanel';
+import { holdingsPanelDefinition } from '../components/panels/portfolio/HoldingsPanel';
+import { transactionsPanelDefinition } from '../components/panels/portfolio/TransactionsPanel';
+import { portfolioSummaryPanelDefinition } from '../components/panels/portfolio/PortfolioSummaryPanel';
 
 export function initializePanels() {
   try {
@@ -48,6 +51,11 @@ export function initializePanels() {
     panelRegistry.register(financialStatementsPanelDefinition);
     panelRegistry.register(financialRatiosPanelDefinition);
     panelRegistry.register(historicalFundamentalsPanelDefinition);
+
+    // Phase 15
+    panelRegistry.register(holdingsPanelDefinition);
+    panelRegistry.register(transactionsPanelDefinition);
+    panelRegistry.register(portfolioSummaryPanelDefinition);
 
     console.log('Panels initialized successfully.');
   } catch (error) {
